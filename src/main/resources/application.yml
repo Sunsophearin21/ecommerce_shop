@@ -1,0 +1,16 @@
+spring:
+  datasource:
+#    url: jdbc:postgresql://localhost:5432/shopeaes
+    url: jdbc:postgresql://turntable.proxy.rlwy.net:46819/railway
+#    username: shopeaes
+    username: postgres
+#    password: shopeaes
+    password: amZlAnAHJeNOHazLsbWZdAwncMOBzbDo
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+jwt:
+  secret: dfsfsdfgsgdsggdsgdgdsggdsgewwr432565476gnghgh634
