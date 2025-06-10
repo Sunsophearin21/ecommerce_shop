@@ -1,11 +1,11 @@
 spring:
   datasource:
 #    url: jdbc:postgresql://localhost:5432/shopeaes
-    url: jdbc:postgresql://turntable.proxy.rlwy.net:46819/railway
+    url: jdbc:postgresql://dpg-d13vanndiees73dcdik0-a.singapore-postgres.render.com/ecommerce_yaiw
 #    username: shopeaes
-    username: postgres
+    username: ecommerce_yaiw_user
 #    password: shopeaes
-    password: amZlAnAHJeNOHazLsbWZdAwncMOBzbDo
+    password: w93gy8VDCUKxU6ibMTT2SIrqOcOxLYQr
   jpa:
     hibernate:
       ddl-auto: update
