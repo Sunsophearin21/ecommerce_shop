@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "categoty_types")

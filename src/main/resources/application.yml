@@ -1,16 +1,40 @@
 spring:
   datasource:
-#    url: jdbc:postgresql://localhost:5432/shopeaes
-    url: jdbc:postgresql://dpg-d13vanndiees73dcdik0-a.singapore-postgres.render.com/ecommerce_yaiw
-#    username: shopeaes
-    username: ecommerce_yaiw_user
-#    password: shopeaes
-    password: w93gy8VDCUKxU6ibMTT2SIrqOcOxLYQr
+    url: jdbc:postgresql://localhost:5432/shopeaes
+    username: shopeaes
+    password: shopeaes
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 905169622081-n409i8df2d8hnrq01khkt2u8dhqem5mj.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+          facebook:
+            client-id: 1366933070973645
+            client-secret: 9d3a024cc26b89fa1ea9e99650b7a75b
+            scope:
+              - email
+              - public_profile
+
 jwt:
-  secret: dfsfsdfgsgdsggdsgdgdsggdsgewwr432565476gnghgh634
+  secret: "YourSuperSecretKeyAtLeast32CharactersLong123"
+  jwtExpiration: 86400000
+bakong:
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiODZlZjIyZGM2MzNiNDI3MiJ9LCJpYXQiOjE3NDkxMDY4NzIsImV4cCI6MTc1Njg4Mjg3Mn0.942lXWHFPCRzDf7TM_GqzFAEuEfUxwYDJQDzrAUeX44
+  account:
+    id: sophearin_sun@aclb
+merchant:
+  name: Sophearin Sun
+  city: PHNOMPENH
+  mobile: 855964962121

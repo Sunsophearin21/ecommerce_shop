@@ -6,9 +6,12 @@ import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
 import com.sunsophearin.shopease.mapper.ProductVariantMapper;
 import com.sunsophearin.shopease.repositories.*;
+import com.sunsophearin.shopease.services.ProductService;
 import com.sunsophearin.shopease.services.ProductVariantService;
 import com.sunsophearin.shopease.services.UploadImageFileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,10 +23,10 @@ import java.util.List;
 public class ProductVariantServiceImpl implements ProductVariantService {
     private final ProductVariantRepository productVariantRepository;
     private final UploadImageFileService uploadImageFileService;
-    private final ColorRepository colorRepository;
-    private final SizeRepository sizeRepository;
-    private final ResourcesRepository resourcesRepository;
     private final ProductVariantMapper productVariantMapper;
+    @Autowired
+    @Lazy
+    private ProductService productService;
 
 
     @Override
@@ -63,6 +66,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     public ProductVariant createProductVariant(ProductVariantDto dto, MultipartFile[] files) throws IOException {
         List<String> uploadImages = uploadImageFileService.uploadImages(files);
         ProductVariant productVariant = productVariantMapper.productVariantDtoToProductVariant(dto);
+        Product product = productService.getProductById(dto.getProductId());
+        productVariant.setProduct(product);
         productVariant.setImages(uploadImages);
         return productVariantRepository.save(productVariant);
     }

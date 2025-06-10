@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 @Data
@@ -17,5 +18,6 @@ public class MenuFacturer {
     private String name;
     @OneToMany(mappedBy = "menuFacturer",cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
     private List<Product> products;
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -38,10 +39,21 @@ public class Product {
     @JoinColumn(name = "categoryType_id",nullable = false)
     private CategoryType categoryType;
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<ProductVariant> productVariants;
     @ManyToOne
     @JoinColumn(name = "menufac_id",nullable = false)
     private MenuFacturer menuFacturer;
+    @Column(name = "product_discount")
+    private Integer discount = 0; // បញ្ចុះតម្លៃជាភាគរយ (%), default = 0
+
+    @Transient //@Transient បញ្ជាក់ថា finalPrice មិនត្រូវរក្សាទុកក្នុង database, គឺគ្រាន់តែគណនាឡើងសម្រាប់ API/json response ប៉ុណ្ណោះ
+    public BigDecimal getFinalPrice() {
+        if (discount != null && discount > 0) {
+            return price.subtract(price.multiply(BigDecimal.valueOf(discount)).divide(BigDecimal.valueOf(100)));
+        }
+        return price;
+    }
     @PrePersist
     protected void onCreate(){
         createAt = new Date();

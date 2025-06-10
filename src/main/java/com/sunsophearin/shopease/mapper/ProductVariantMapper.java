@@ -9,18 +9,14 @@ import com.sunsophearin.shopease.services.SizeService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring",uses = {ColorService.class, ProductService.class, SizeService.class})
+@Mapper(componentModel = "spring", uses = {ColorService.class, SizeService.class})
 public interface ProductVariantMapper {
-//    @Mapping(target = "color",source = "colorId")
-//    @Mapping(target = "product",source = "productId")
-//    @Mapping(target = "size",source = "sizeId")
-//    @Mapping(target = "resources",source = "resourcesId")
-//    ProductVariant productVariantDtoToProductVariant(ProductVariantDto dto);
 
-    @Mapping(target = "color",source = "colorId")
-    @Mapping(target = "product",source = "productId")
+    @Mapping(target = "color", source = "colorId")
+    @Mapping(target = "product", ignore = true) // Remove product mapping
     ProductVariant productVariantDtoToProductVariant(ProductVariantDto dto);
-    @Mapping(target = "productId",source = "product.id")
-    @Mapping(target = "colorId",source = "color.id")
-    ProductVariantDto productVariantToProductVariantDto(ProductVariant productVariant);
+
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "colorId", source = "color.id")
+    ProductVariantDto productVariantToProductVariantDto(ProductVariant entity);
 }

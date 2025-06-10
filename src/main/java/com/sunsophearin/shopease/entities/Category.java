@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class Category {
     private String code;
     private String description;
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL)
-    @JsonIgnore
+//    @JsonIgnore
+    @ToString.Exclude
     private List<CategoryType> categoryTypes;
 }

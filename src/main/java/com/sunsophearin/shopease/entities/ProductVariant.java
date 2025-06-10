@@ -1,9 +1,9 @@
 package com.sunsophearin.shopease.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -22,7 +22,12 @@ public class ProductVariant {
     @JoinColumn(name = "product_id", nullable = false)
     @JsonIgnore
     private Product product;
-    @OneToMany(mappedBy = "productVariant",cascade = CascadeType.ALL)
+    // Stock related to this variant (different sizes)
+    @OneToMany(mappedBy = "productVariant", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<Stock> stocks;
+    @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ImportStock> importStocks;
 }
 

@@ -1,24 +1,37 @@
 package com.sunsophearin.shopease.mapper;
 
-import com.sunsophearin.shopease.dto.ProductDto;
-import com.sunsophearin.shopease.dto.ProductDtoRespone;
+import com.sunsophearin.shopease.dto.*;
 import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.services.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring",uses = {CategoryService.class,
-        CategoryTypeService.class, MenuFacturerService.class,ProductVariantMapper.class })
-public interface ProductMapper {
-    @Mapping(target = "categoryType",source = "categoryTypeId")
-    @Mapping(target = "category",source = "categoryId")
-    @Mapping(target = "menuFacturer",source = "menuFacturerId")
-    Product productDtoToProduct(ProductDto dto);
-//    @Mapping(target = "categoryId",source = "category.id")
-//    @Mapping(target = "categoryTypeId",source = "categoryType.id")
-//    @Mapping(target = "menuFacturerId",source = "menuFacturer.id")
-////    @Mapping(target = "productVariant",source = "productVariants.id")
-//    ProductDto productToProductDto(Product product);
+import java.util.List;
 
-//    ProductDtoRespone productToProductDtoRespone(Product product);
+@Mapper(componentModel = "spring", uses = {
+        CategoryService.class,
+        CategoryTypeService.class,
+        MenuFacturerService.class,
+        ProductVariantService.class
+})
+public interface ProductMapper {
+
+    // Create (DTO to entity)
+    @Mapping(target = "categoryType", source = "categoryTypeId")
+    @Mapping(target = "category", source = "categoryId")
+    @Mapping(target = "menuFacturer", source = "menuFacturerId")
+    Product productDtoToProduct(ProductDto dto);
+
+    // Read (Entity to DTO)
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "categoryType", source = "categoryType")
+    @Mapping(target = "menuFacturer", source = "menuFacturer")
+    @Mapping(target = "productVariants", source = "productVariants")
+
+    // ✅ Map discount directly
+    @Mapping(target = "discount", source = "discount")
+
+    // ✅ Map finalPrice using method (manually mapped via expression)
+    @Mapping(target = "finalPrice", expression = "java(product.getFinalPrice())")
+    ProductDtoRespone toDtoList(Product product);
 }

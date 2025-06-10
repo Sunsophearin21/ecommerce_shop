@@ -1,25 +1,28 @@
 package com.sunsophearin.shopease.services.impl;
 
+import com.sunsophearin.shopease.dto.ImportStockRequestDTO;
 import com.sunsophearin.shopease.dto.ProductDto;
 import com.sunsophearin.shopease.dto.ProductDtoRespone;
 import com.sunsophearin.shopease.dto.ProductVariantDto;
-import com.sunsophearin.shopease.entities.Product;
-import com.sunsophearin.shopease.entities.ProductVariant;
+import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.exception.ApiNotFoundException;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
 import com.sunsophearin.shopease.mapper.ProductMapper;
 import com.sunsophearin.shopease.mapper.ProductVariantMapper;
-import com.sunsophearin.shopease.repositories.ProductRepository;
-import com.sunsophearin.shopease.repositories.ProductVariantRepository;
+import com.sunsophearin.shopease.repositories.*;
 import com.sunsophearin.shopease.services.ProductService;
+import com.sunsophearin.shopease.services.ProductVariantService;
+import com.sunsophearin.shopease.services.SizeService;
 import com.sunsophearin.shopease.services.UploadImageFileService;
 import com.sunsophearin.shopease.specification.ProductFilter;
 import com.sunsophearin.shopease.specification.ProductSpec;
 import com.sunsophearin.shopease.specification.ProductSpecification;
 import com.sunsophearin.shopease.specification.productFilter2;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -32,7 +35,10 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final ProductVariantRepository productVariantRepository;
+    private final ImportStockRepository importStockRepository;
+    private final StockRepository stockRepository;
+    private final ProductVariantService productVariantService;
+    private final SizeService sizeService;
     @Override
     public Product createProduct(ProductDto dto) {
         return productRepository.save(productMapper.productDtoToProduct(dto));
@@ -79,17 +85,127 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findVariant(Long productId,  List<Long> colorIds) {
+    public ProductDtoRespone findVariant(Long productId, Long color_id,Long size_id) {
         Product productById = getProductById(productId);
+
         List<ProductVariant> variants = productById.getProductVariants();
-        if (colorIds != null && !colorIds.isEmpty()) {
-            variants = variants.stream()
-                    .filter(v -> colorIds.contains(v.getColor().getId()))
-                    .toList();
+        if (variants == null || variants.isEmpty()) {
+            return null;
         }
 
-        productById.setProductVariants(variants); // update the product with filtered variants
+        // Step 1: Filter by color_id if provided
+        List<ProductVariant> filteredVariants = variants;
+        if (color_id != null) {
+            filteredVariants = variants.stream()
+                    .filter(v -> v.getColor() != null && color_id.equals(v.getColor().getId()))
+                    .collect(Collectors.toList());
+        }
 
-        return productById;
+        // Step 2: If size_id is provided, filter importProducts
+        if (size_id != null) {
+            for (ProductVariant variant : filteredVariants) {
+                List<Stock> filteredImports = variant.getStocks().stream()
+                        .filter(ip -> ip.getSize() != null && size_id.equals(ip.getSize().getId()))
+                        .collect(Collectors.toList());
+
+                variant.setStocks(filteredImports);
+            }
+        }
+
+        // Step 3: Update the product with filtered variants
+        productById.setProductVariants(filteredVariants);
+
+        return productMapper.toDtoList(productById);
+    }
+
+
+    @Override
+    public List<Product> getProductByCategoryType(Long cateId) {
+        List<Product> products = productRepository.findByCategoryTypeId(cateId);
+        if (products.isEmpty()) {
+            throw new ResoureApiNotFound("Product with category type", cateId);
+        }
+        return products;
+    }
+
+    @Transactional
+    @Override
+    public ImportStock importProduct(ImportStockRequestDTO dto) {
+        // 1. Validate input
+        validateImportRequest(dto);
+
+        // 2. Fetch required entities
+        ProductVariant variant = productVariantService.getById(dto.getProductVariantId());
+        Size size = sizeService.getSizeById(dto.getSizeId());
+
+        // 3. Create import record
+        ImportStock savedImport = createImportRecord(dto, variant, size);
+
+        // 4. Update stock
+        updateStockInventory(dto, variant, size);
+
+        return savedImport;
+    }
+
+    private void validateImportRequest(ImportStockRequestDTO dto) {
+        Assert.notNull(dto, "Import request DTO cannot be null");
+        Assert.notNull(dto.getProductVariantId(), "Product variant ID is required");
+        Assert.notNull(dto.getSizeId(), "Size ID is required");
+        Assert.isTrue(dto.getQuantity() > 0, "Quantity must be positive");
+        Assert.isTrue(dto.getImportPricePerUnit() > 0, "Import price must be positive");
+    }
+
+    private ImportStock createImportRecord(ImportStockRequestDTO dto, ProductVariant variant, Size size) {
+        return importStockRepository.save(
+                ImportStock.builder()
+                        .productVariant(variant)
+                        .size(size)
+                        .quantity(dto.getQuantity())
+                        .importPricePerUnit(dto.getImportPricePerUnit())
+                        .build()
+        );
+    }
+
+    private void updateStockInventory(ImportStockRequestDTO dto, ProductVariant variant, Size size) {
+        stockRepository.findByProductVariantAndSize(variant, size)
+                .ifPresentOrElse(
+                        stock -> updateExistingStock(stock, dto),
+                        () -> createNewStock(variant, size, dto)
+                );
+    }
+
+    private void updateExistingStock(Stock stock, ImportStockRequestDTO dto) {
+        int totalQty = stock.getCurrentQuantity() + dto.getQuantity();
+        double newAveragePrice = calculateWeightedAverage(
+                stock.getCurrentQuantity(),
+                stock.getAverageImportPrice(),
+                dto.getQuantity(),
+                dto.getImportPricePerUnit()
+        );
+
+        stock.setCurrentQuantity(totalQty);
+        stock.setAverageImportPrice(newAveragePrice);
+        stockRepository.save(stock);
+    }
+
+    private double calculateWeightedAverage(int currentQty, double currentPrice, int newQty, double newPrice) {
+        double currentTotal = currentPrice * currentQty;
+        double newTotal = newPrice * newQty;
+        return (currentTotal + newTotal) / (currentQty + newQty);
+    }
+
+    private void createNewStock(ProductVariant variant, Size size, ImportStockRequestDTO dto) {
+        stockRepository.save(
+                Stock.builder()
+                        .productVariant(variant)
+                        .size(size)
+                        .currentQuantity(dto.getQuantity())
+                        .averageImportPrice(dto.getImportPricePerUnit())
+                        .build()
+        );
+    }
+    @Override
+    public Stock getStockById(Long id) {
+        return stockRepository.findById(id).orElseThrow(()->new ResoureApiNotFound("Stock",id));
     }
 }

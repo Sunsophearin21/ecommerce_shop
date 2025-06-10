@@ -1,4 +1,5 @@
 package com.sunsophearin.shopease.dto;
+
 import com.sunsophearin.shopease.entities.ProductVariant;
 import lombok.Data;
 
@@ -12,13 +13,15 @@ public class ProductDtoRespone {
     private String name;
     private String description;
     private BigDecimal price;
-    private boolean newArrival;
+    private Integer discount;       // ✅ បញ្ចុះតម្លៃ (%)
+    private BigDecimal finalPrice;  // ✅ តម្លៃក្រោយបញ្ចុះ
+
     private Date createAt;
     private Date updateAt;
 
     private CategoryDto category;
     private CategoryTypeDto categoryType;
+    private List<ProductVariant> productVariants;
     private MenuFactureDto menuFacturer;
-    private ProductVariantDto productVariant;
-    private List<ProductVariantDto> productVariants;
+    private boolean newArrival;
 }

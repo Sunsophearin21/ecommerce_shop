@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/color")
+@RequestMapping("api/colors")
 @RequiredArgsConstructor
 public class ColorController {
     private final ColorService colorService;

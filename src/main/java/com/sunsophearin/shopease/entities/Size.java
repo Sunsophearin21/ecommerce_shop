@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class Size {
     private Long id;
     @Column(name = "size_name")
     private String name;
-    @OneToMany(mappedBy = "size",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "size", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
     private List<Stock> stocks;
 }
