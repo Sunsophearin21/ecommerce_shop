@@ -47,6 +47,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
-        response.sendRedirect("http://localhost:8080/me");
+        response.sendRedirect("http://localhost:3000");
     }
 }
