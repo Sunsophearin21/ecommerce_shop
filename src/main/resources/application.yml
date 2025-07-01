@@ -19,13 +19,14 @@ spring:
             scope:
               - email
               - profile
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID}
             client-secret: ${FACEBOOK_CLIENT_SECRET}
             scope:
               - email
               - public_profile
+            redirect-uri: ${FACEBOOK_REDIRECT_URI:http://localhost:8080/login/oauth2/code/facebook}
 
 jwt:
   secret: ${JWT_SECRET}
