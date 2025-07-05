@@ -16,7 +16,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -30,18 +29,20 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final OAuth2AuthenticationSuccessHandler oAuth2LoginSuccessHandler;
+
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ អនុញ្ញាតឲ្យប្រើបានសេរី (មិនចាំបាច់មាន Token)
                         .requestMatchers(
+                                "/swagger-ui/**",
                                 "/api/auth/**",
                                 "/oauth2/**",
                                 "/api/products/**",
@@ -50,23 +51,11 @@ public class SecurityConfig {
                                 "/api/colors/**",
                                 "/api/test/**",
                                 "/api/size/**",
-                                "/api/auth/**",
-                                "/api/payment/**"
+                                "/api/sales/**",
+                                "/ws/**",
+                                "/topic/**",
+                                "/app/**"
                         ).permitAll()
-
-                        // ✅ អនុញ្ញាត GET ក្នុង /api/payment/** (សម្រាប់មើល QR Code ឬព័ត៌មានទូទៅ)
-//                        .requestMatchers(HttpMethod.GET, "/api/payment/**").permitAll()
-
-                        // 🔐 ត្រូវការជា User មាន Token បើត្រូវ POST ឬ PUT /api/payment/**
-//                        .requestMatchers("/api/payment/**").authenticated()
-
-                        // 🔐 ត្រូវមាន Role ជា Admin
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 🔐 អ្នកប្រើដែលមាន Role USER ឬ ADMIN
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
-
-                        // 🔐 សំណើផ្សេងទៀត ត្រូវមានការផ្ទៀងផ្ទាត់
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -78,8 +67,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

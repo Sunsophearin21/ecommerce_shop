@@ -2,14 +2,12 @@ package com.sunsophearin.shopease.services.impl;
 
 import com.sunsophearin.shopease.dto.PaymentRequest;
 import com.sunsophearin.shopease.dto.SaleDto;
-import com.sunsophearin.shopease.entities.*;
-import com.sunsophearin.shopease.exception.ResoureApiNotFound;
-import com.sunsophearin.shopease.repositories.*;
+import com.sunsophearin.shopease.entities.Sale;
 import com.sunsophearin.shopease.security.entities.User;
 import com.sunsophearin.shopease.security.service.impl.UserServiceImpl;
 import com.sunsophearin.shopease.services.PaymentService;
-import com.sunsophearin.shopease.services.ProductService;
 import com.sunsophearin.shopease.services.SaleService;
+import com.sunsophearin.shopease.util.TelegramMessageBuilder;
 import jakarta.annotation.PreDestroy;
 import kh.org.nbc.bakong_khqr.BakongKHQR;
 import kh.org.nbc.bakong_khqr.model.*;
@@ -23,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -35,6 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final SimpMessagingTemplate messagingTemplate;
     private final SaleService saleService;
     private final UserServiceImpl userService;
+    private final TelegramBotService telegramBotService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final Map<String, ScheduledFuture<?>> runningTasks = new ConcurrentHashMap<>();
@@ -54,11 +52,16 @@ public class PaymentServiceImpl implements PaymentService {
     public Map<String, Object> generateKhqr(SaleDto saleDto, String userEmail) {
         userService.findUserName(userEmail);
 
-        // Calculate total price using SaleService
+        // Enrich sale details with product info (names, prices, etc.)
+        saleService.enrichSaleDetailDTOs(saleDto);
+
+        // Calculate total price after enrichment
         BigDecimal totalAmount = saleService.calculateTotalPrice(saleDto);
-        log.info("total amount {}",totalAmount);
-        IndividualInfo qrInfo = buildQrInfo(saleDto, totalAmount);
+        log.info("total amount {}", totalAmount);
+
+        IndividualInfo qrInfo = buildQrInfo(totalAmount);
         KHQRResponse<KHQRData> qrResponse = BakongKHQR.generateIndividual(qrInfo);
+
         if (qrResponse.getKHQRStatus().getCode() == 0) {
             String qr = qrResponse.getData().getQr();
             String md5 = qrResponse.getData().getMd5();
@@ -71,24 +74,17 @@ public class PaymentServiceImpl implements PaymentService {
         throw new RuntimeException("Failed to generate QR: " + qrResponse.getKHQRStatus().getMessage());
     }
 
-    @Override
-    public Map<String, Object> generateKhqr2(PaymentRequest request, String userEmail) {
-        return Map.of();
-    }
-
-    private IndividualInfo buildQrInfo(SaleDto saleDto, BigDecimal totalAmount) {
+    private IndividualInfo buildQrInfo(BigDecimal totalAmount) {
         IndividualInfo info = new IndividualInfo();
         info.setBakongAccountId(bakongAccountId);
         info.setCurrency(KHQRCurrency.USD);
         info.setAmount(totalAmount.doubleValue());
         info.setMerchantName(merchantName);
         info.setMerchantCity(merchantCity);
-//        info.setBillNumber(saleDto.getTransactionId());
         info.setMobileNumber(merchantMobile);
         info.setStoreLabel("Mrr.Black");
         return info;
     }
-
 
     private void schedulePaymentPolling(SaleDto saleDto, String userEmail, String md5) {
         if (runningTasks.containsKey(md5)) {
@@ -102,16 +98,27 @@ public class PaymentServiceImpl implements PaymentService {
                 Map<String, Object> paymentStatus = checkPayment(md5);
 
                 if (isPaymentSuccessful(paymentStatus)) {
-                    // Process sale via SaleService
-                    saleService.processSale(saleDto, userEmail);
+                    // Get the saved Sale with transactionId
+                    Sale savedSale = saleService.processSale(saleDto, userEmail);
 
-                    // Notify frontend
+                    saleService.enrichSaleDetailDTOs(saleDto);
+
+                    BigDecimal totalAmount = saleService.calculateTotalPrice(saleDto);
+                    String notifyMsg = TelegramMessageBuilder.buildOrderNotification(
+                            savedSale, // Pass transactionId from entity
+                            saleDto,
+                            userEmail,
+                            "PAID",
+                            totalAmount
+                    );
+                    telegramBotService.sendOrderNotification(notifyMsg);
+
+                    // Notify frontend via WebSocket
                     messagingTemplate.convertAndSend(
                             PAYMENT_TOPIC,
                             Map.of("md5", md5, "status", "PAID")
                     );
 
-                    // Stop polling
                     cancelPolling(md5);
                 }
             } catch (Exception e) {
@@ -126,9 +133,9 @@ public class PaymentServiceImpl implements PaymentService {
         scheduler.schedule(() -> cancelPolling(md5), 2, TimeUnit.MINUTES);
     }
 
+
     private boolean isPaymentSuccessful(Map<String, Object> paymentStatus) {
         return paymentStatus != null &&
-                paymentStatus.get("responseCode") != null &&
                 Integer.valueOf(0).equals(paymentStatus.get("responseCode"));
     }
 
@@ -163,12 +170,6 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Failed to check payment status");
         }
     }
-
-    @Override
-    public void confirmAndSaveSale(PaymentRequest dto, String userEmail, String md5) {
-
-    }
-
     @PreDestroy
     public void shutdownScheduler() {
         log.info("Shutting down scheduler...");

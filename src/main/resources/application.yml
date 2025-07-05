@@ -31,7 +31,7 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  jwtExpiration: 120000
+  jwtExpiration: ${JWT_EXPIRATION:604800000}
 
 bakong:
   token: ${BAKONG_TOKEN}
@@ -42,3 +42,9 @@ merchant:
   name: ${MERCHANT_NAME}
   city: ${MERCHANT_CITY}
   mobile: ${MERCHANT_MOBILE}
+telegram:
+  bot:
+    token: ${BOT_TOKEN}
+    chat-id: ${BOT_ID}
+ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+

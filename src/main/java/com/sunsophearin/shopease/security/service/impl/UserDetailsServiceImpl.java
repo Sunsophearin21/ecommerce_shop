@@ -18,14 +18,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"+username));
-        String password = user.getPassword() != null ? user.getPassword() : "oauth2-user-password";
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // Handle OAuth2 users with null passwords
+        String password = user.getPassword() != null ?
+                user.getPassword() :
+                "{noop}oauth2-user-password";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 password,
-                user.getRoles()
-                        .stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
                         .collect(Collectors.toList())
         );
     }

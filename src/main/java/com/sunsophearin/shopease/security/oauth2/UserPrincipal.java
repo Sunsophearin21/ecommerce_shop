@@ -7,14 +7,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 public class UserPrincipal implements OAuth2User {
+
     private final User user;
     private final Map<String, Object> attributes;
 
@@ -30,11 +28,13 @@ public class UserPrincipal implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-            return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String getName() {
-        return user.getUsername(); // or user.getEmail() if needed
+        return user.getUsername(); // or getEmail()
     }
 }

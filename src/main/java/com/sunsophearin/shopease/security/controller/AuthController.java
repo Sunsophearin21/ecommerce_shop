@@ -35,20 +35,13 @@ public class AuthController {
     private final UserServiceImpl userService;
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
-        String token = jwtUtil.extractTokenFromCookie(request);
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         try {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String email = claims.getSubject();
-            List<String> roles = claims.get("roles", List.class);
+            String email = jwtUtil.getEmailFromRequest(request);
             User user = userService.findUserName(email);
 
             return ResponseEntity.ok(Map.of(
                     "email", email,
-                    "roles", roles,
-                    "username", user.getId(),// Add username field
+                    "username", user.getName(),// Add username field
                     "picture",user.getPicture()
             ));
         } catch (Exception e) {
@@ -56,49 +49,4 @@ public class AuthController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
-//@GetMapping("/profile")
-//public ResponseEntity<User> getProfile(@AuthenticationPrincipal OAuth2User principal) {
-//    // Get email or username from OAuth2 principal
-//    String email = principal.getAttribute("email"); // Or "preferred_username" for some providers
-//    // Fetch user from your database
-//    User user = userService.findUserName(email);
-//    return ResponseEntity.ok(user);
-//}
-//    @GetMapping("/profile")
-//    public ResponseEntity<?> getProfile(Authentication authentication) {
-//        if (authentication != null && authentication.isAuthenticated()) {
-//            User userName = userService.findUserName(authentication.getName());
-//            return ResponseEntity.ok(userName);
-//            // Extract claims as needed
-//        }
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//    }
-@GetMapping("/me")
-public ResponseEntity<?> getAuthenticatedUser(Authentication authentication) {
-    // ពិនិត្យ null និងស្ថានភាពផ្ទៀងផ្ទាត់
-    if (authentication == null || !authentication.isAuthenticated()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    // យកអ៊ីមែលពី principal (ដំណើរការសម្រាប់ JWT និង OAuth2)
-    String email = authentication.getName();
-
-    // យកព័ត៌មានអ្នកប្រើពី database
-    User user = userService.findUserName(email);
-
-    // យក roles ពី authorities
-    List<String> roles = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
-
-    // បង្កើត response
-    return ResponseEntity.ok(Map.of(
-            "email", email,
-            "roles", roles,
-            "username", user.getName(),
-            "picture", user.getPicture()
-    ));
-}
-
-
 }

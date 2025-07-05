@@ -6,7 +6,6 @@ import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
 import com.sunsophearin.shopease.repositories.*;
 import com.sunsophearin.shopease.security.entities.User;
-import com.sunsophearin.shopease.security.repository.UserRepository;
 import com.sunsophearin.shopease.security.service.impl.UserServiceImpl;
 import com.sunsophearin.shopease.services.SaleService;
 import jakarta.transaction.Transactional;
@@ -28,62 +27,100 @@ public class SaleServiceImpl implements SaleService {
     private final StockRepository stockRepo;
     private final SaleDetailRepository saleDetailRepo;
     private final UserServiceImpl userService;
+    private final ColorRepository colorRepository;
+    private final SizeRepository sizeRepository;
+
+    @Override
+    public void enrichSaleDetailDTOs(SaleDto saleDto) {
+        if (saleDto == null || saleDto.getSaleDetailDTOS() == null) return;
+
+        // Fetch all needed products in batch
+        List<Long> productIds = saleDto.getSaleDetailDTOS().stream()
+                .map(SaleDetailDTO::getProductId)
+                .filter(Objects::nonNull)
+                .toList();
+        Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        // Fetch all needed colors and sizes in batch (optional, for performance)
+        List<Long> colorIds = saleDto.getSaleDetailDTOS().stream()
+                .map(SaleDetailDTO::getColorId)
+                .filter(Objects::nonNull)
+                .toList();
+        Map<Long, Color> colorMap = colorRepository.findAllById(colorIds).stream()
+                .collect(Collectors.toMap(Color::getId, Function.identity()));
+
+        List<Long> sizeIds = saleDto.getSaleDetailDTOS().stream()
+                .map(SaleDetailDTO::getSizeId)
+                .filter(Objects::nonNull)
+                .toList();
+        Map<Long, Size> sizeMap = sizeRepository.findAllById(sizeIds).stream()
+                .collect(Collectors.toMap(Size::getId, Function.identity()));
+
+        // Set productName, unitPrice, colorName, and sizeName
+        for (SaleDetailDTO detail : saleDto.getSaleDetailDTOS()) {
+            Product product = productMap.get(detail.getProductId());
+            if (product == null) throw new RuntimeException("Product not found: " + detail.getProductId());
+            detail.setProductName(product.getName());
+            detail.setUnitPrice(product.getFinalPrice());
+
+            Color color = colorMap.get(detail.getColorId());
+            detail.setColorName(color != null ? color.getName() : null);
+
+            Size size = sizeMap.get(detail.getSizeId());
+            detail.setSizeName(size != null ? size.getName() : null);
+        }
+    }
 
     @Override
     @Transactional
-    public void processSale(SaleDto saleDto, String userEmail) {
-        User userName = userService.findUserName(userEmail);
-        // 1. Fetch products and variants in batch
-        Map<Long, Product> productMap = fetchProducts(saleDto);
-        Map<Long, ProductVariant> variantMap = fetchVariants(saleDto);
+    public Sale processSale(SaleDto saleDto, String userEmail) {
+        enrichSaleDetailDTOs(saleDto); // Always enrich before processing
+        User user = userService.findUserName(userEmail);
 
-        // 2. Prepare data for updates
+        Map<Long, ProductVariant> variantMap = fetchVariants(saleDto);
         ProcessingResult result = processItems(saleDto, variantMap);
-//        BigDecimal totalPrice = result.totalPrice;
+
+        // Update stock
         for (SaleDetailDTO detail : saleDto.getSaleDetailDTOS()) {
             ProductVariant variant = variantMap.get(detail.getVariantId());
             Stock stock = getStockOrThrow(detail, variant);
             stock.setCurrentQuantity(stock.getCurrentQuantity() - detail.getQuantity());
             stockRepo.save(stock);
         }
-        // 3. Update stock
         stockRepo.saveAll(result.stocksToUpdate());
 
-        // 4. Create and save sale record
-        Sale sale = createSaleRecord(result,userName);
+        // --- FIX: Always set transactionId before saving ---
+        Sale sale = createSaleRecord(result, user);
+        if (sale.getTransactionId() == null || sale.getTransactionId().isEmpty()) {
+            sale.setTransactionId("tst" + UUID.randomUUID().toString().replace("-", ""));
+        }
         Sale savedSale = saleRepo.save(sale);
-
-        // 5. Save sale details
         saveSaleDetails(result.saleDetails(), savedSale);
+        return savedSale;
     }
 
     @Override
     public BigDecimal calculateTotalPrice(SaleDto saleDto) {
-        Map<Long, ProductVariant> variantMap = fetchVariants(saleDto);
-        return processItems(saleDto, variantMap).totalPrice();
+        if (saleDto == null || saleDto.getSaleDetailDTOS() == null) return BigDecimal.ZERO;
+        enrichSaleDetailDTOs(saleDto);
+        return saleDto.getSaleDetailDTOS().stream()
+                .filter(detail -> detail.getUnitPrice() != null && detail.getQuantity() != null)
+                .map(detail -> detail.getUnitPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Helper: Fetch products as a map
-    private Map<Long, Product> fetchProducts(SaleDto saleDto) {
-        List<Long> productIds = saleDto.getSaleDetailDTOS().stream()
-                .map(SaleDetailDTO::getProductId)
-                .toList();
+    // --- Helper methods ---
 
-        return productRepository.findAllById(productIds).stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity()));
-    }
-
-    // Helper: Fetch variants as a map
     private Map<Long, ProductVariant> fetchVariants(SaleDto saleDto) {
         List<Long> variantIds = saleDto.getSaleDetailDTOS().stream()
                 .map(SaleDetailDTO::getVariantId)
+                .filter(Objects::nonNull)
                 .toList();
-
         return variantRepo.findAllById(variantIds).stream()
                 .collect(Collectors.toMap(ProductVariant::getId, Function.identity()));
     }
 
-    // Helper: Process each sale item
     private ProcessingResult processItems(SaleDto saleDto, Map<Long, ProductVariant> variantMap) {
         List<Stock> stocksToUpdate = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -92,76 +129,42 @@ public class SaleServiceImpl implements SaleService {
 
         for (SaleDetailDTO detail : saleDto.getSaleDetailDTOS()) {
             ProductVariant variant = getVariantOrThrow(detail, variantMap);
-
-            // --- Color validation ---
             if (detail.getColorId() != null && variant.getColor() != null &&
                     !detail.getColorId().equals(variant.getColor().getId())) {
-                throw new RuntimeException(
-                        "Color mismatch: variant colorId=" + variant.getColor().getId() +
-                                ", but requested colorId=" + detail.getColorId()
-                );
+                throw new RuntimeException("Color mismatch: variant colorId=" + variant.getColor().getId() +
+                        ", but requested colorId=" + detail.getColorId());
             }
-            // ------------------------
-
             Stock stock = getStockOrThrow(detail, variant);
             validateStockQuantity(stock, detail.getQuantity());
 
-//            updateStock(stock, detail.getQuantity(), stocksToUpdate);
-            ProcessingResult itemResult = calculateItem(variant, detail.getQuantity());
-
-            totalPrice = totalPrice.add(itemResult.totalPrice);
+            BigDecimal itemPrice = variant.getProduct().getFinalPrice()
+                    .multiply(BigDecimal.valueOf(detail.getQuantity()));
+            totalPrice = totalPrice.add(itemPrice);
             totalQty += detail.getQuantity();
             saleDetails.add(createSaleDetail(variant, stock, detail));
         }
-
-
         return new ProcessingResult(stocksToUpdate, totalPrice, totalQty, saleDetails);
     }
 
-    // Helper: Get variant or throw error
     private ProductVariant getVariantOrThrow(SaleDetailDTO detail, Map<Long, ProductVariant> variantMap) {
         return Optional.ofNullable(variantMap.get(detail.getVariantId()))
-                .orElseThrow(() -> new ResoureApiNotFound(
-                        "ProductVariant not found",
-                        detail.getVariantId()
-                ));
+                .orElseThrow(() -> new ResoureApiNotFound("ProductVariant not found", detail.getVariantId()));
     }
 
-    // Helper: Get stock or throw error
     private Stock getStockOrThrow(SaleDetailDTO detail, ProductVariant variant) {
         return variant.getStocks().stream()
                 .filter(s -> s.getSize().getId().equals(detail.getSizeId()))
                 .findFirst()
-                .orElseThrow(() -> new ResoureApiNotFound(
-                        "Size not found for product variant",
-                        detail.getSizeId()
-                ));
+                .orElseThrow(() -> new ResoureApiNotFound("Size not found for product variant", detail.getSizeId()));
     }
 
-    // Helper: Validate stock quantity
     private void validateStockQuantity(Stock stock, int requestedQty) {
         if (stock.getCurrentQuantity() < requestedQty) {
-            throw new RuntimeException(
-                    "Insufficient stock: " + stock.getCurrentQuantity() +
-                            " left, requested: " + requestedQty
-            );
+            throw new RuntimeException("Insufficient stock: " + stock.getCurrentQuantity() +
+                    " left, requested: " + requestedQty);
         }
     }
 
-    // Helper: Update stock
-    private void updateStock(Stock stock, int soldQty, List<Stock> stocksToUpdate) {
-        stock.setCurrentQuantity(stock.getCurrentQuantity() - soldQty);
-        stocksToUpdate.add(stock);
-    }
-
-    // Helper: Calculate item price
-    private ProcessingResult calculateItem(ProductVariant variant, int quantity) {
-        BigDecimal itemPrice = variant.getProduct().getFinalPrice()
-                .multiply(BigDecimal.valueOf(quantity));
-        return new ProcessingResult(itemPrice, quantity);
-    }
-
-    // Helper: Create sale detail
     private SaleDetail createSaleDetail(ProductVariant variant, Stock stock, SaleDetailDTO detail) {
         SaleDetail saleDetail = new SaleDetail();
         saleDetail.setProduct(variant.getProduct());
@@ -172,32 +175,26 @@ public class SaleServiceImpl implements SaleService {
         return saleDetail;
     }
 
-    // Helper: Create sale record
-    private Sale createSaleRecord(ProcessingResult result,User user) {
+    private Sale createSaleRecord(ProcessingResult result, User user) {
         Sale sale = new Sale();
         sale.setStatus("PAID");
         sale.setUser(user);
         sale.setFinalPrice(result.totalPrice());
         sale.setQuantity(result.totalQty());
+        // transactionId will be set in processSale if missing
         return sale;
     }
 
-    // Helper: Save sale details
     private void saveSaleDetails(List<SaleDetail> saleDetails, Sale savedSale) {
         saleDetails.forEach(detail -> detail.setSale(savedSale));
         saleDetailRepo.saveAll(saleDetails);
     }
 
-    // Record class for processing results
+    // --- Record for processing results ---
     private record ProcessingResult(
             List<Stock> stocksToUpdate,
             BigDecimal totalPrice,
             int totalQty,
             List<SaleDetail> saleDetails
-    ) {
-        // Overloaded constructor for item calculation
-        public ProcessingResult(BigDecimal itemPrice, int quantity) {
-            this(null, itemPrice, quantity, null);
-        }
-    }
+    ) {}
 }

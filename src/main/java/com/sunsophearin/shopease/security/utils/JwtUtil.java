@@ -26,30 +26,40 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;
     }
-    public String extractTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
 
-        for (Cookie cookie : cookies) {
-            if ("token".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
+    // Simplified token extraction
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "token".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
     }
-    // ✅ New method to generate token with roles
+
+    // Consolidated email extraction with proper error handling
+    public String getEmailFromRequest(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        if (token == null) return null;
+        return extractUsername(token);
+    }
+
+    // Improved token generation with roles
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        claims.put("roles", roles);
-
-        return createToken(claims, userDetails.getUsername());
+        claims.put("roles", getRoles(userDetails));
+        return buildToken(claims, userDetails.getUsername());
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private List<String> getRoles(UserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+    }
+
+
+    private String buildToken(Map<String, Object> claims, String subject) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
@@ -62,45 +72,44 @@ public class JwtUtil {
                 .compact();
     }
 
+    // Consolidated claims extraction with better error handling
     public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+        return parseToken(token).getSubject();
     }
 
-    public List<String> extractRoles(String token) {
-        Claims claims = extractAllClaims(token);
-        return claims.get("roles", List.class);
-    }
-
-    public Claims extractAllClaims(String token) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .setAllowedClockSkewSeconds(60) // Optional: allow 60s clock skew
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            throw new ExpiredJwtException(e.getHeader(), e.getClaims(), "Token has expired");
-        } catch (JwtException e) {
-            throw new RuntimeException("Invalid token", e);
-        }
-    }
+            final Claims claims = parseToken(token);
+            final String username = claims.getSubject();
+            final Date expiration = claims.getExpiration();
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        try {
-            String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            return username.equals(userDetails.getUsername()) && !expiration.before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    private boolean isTokenExpired(String token) {
-        Date expiration = extractAllClaims(token).getExpiration();
-        return expiration.before(new Date());
+    private Claims parseToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .setAllowedClockSkewSeconds(60)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public List<String> extractRoles(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        if (token == null) {
+            return Collections.emptyList();
+        }
+        Claims claims = parseToken(token);
+        Object roles = claims.get("roles");
+
+        if (roles instanceof List<?>) {
+            return ((List<?>) roles).stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
