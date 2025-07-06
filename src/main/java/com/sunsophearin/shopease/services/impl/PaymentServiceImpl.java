@@ -1,9 +1,7 @@
 package com.sunsophearin.shopease.services.impl;
 
-import com.sunsophearin.shopease.dto.PaymentRequest;
 import com.sunsophearin.shopease.dto.SaleDto;
 import com.sunsophearin.shopease.entities.Sale;
-import com.sunsophearin.shopease.security.entities.User;
 import com.sunsophearin.shopease.security.service.impl.UserServiceImpl;
 import com.sunsophearin.shopease.services.PaymentService;
 import com.sunsophearin.shopease.services.SaleService;
