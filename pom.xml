@@ -129,7 +129,6 @@
 			<version>9.0.0</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<!-- Java Compiler Plugin -->
