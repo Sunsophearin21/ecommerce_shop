@@ -79,7 +79,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductsByVariant(id,productVariant));
     }
     @GetMapping("/{productId}")
-//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> getProductVariantByColorAndSize(
             @PathVariable Long productId,
             @RequestParam(value = "color_id", required = false) Long colorId,

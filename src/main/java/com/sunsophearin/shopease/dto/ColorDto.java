@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class ColorDto {
     private String name;
+    private String colorCode;
 }

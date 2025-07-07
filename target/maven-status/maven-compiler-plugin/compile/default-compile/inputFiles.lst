@@ -20,8 +20,9 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\ProductDto.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\ProductDtoRespone.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\ProductVariantDto.java
-D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\ProductVariantDto2.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\ResourcesDto.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\response\SaleDetailDtoResponse.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\response\SaleDtoResponse.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\SaleDetailDTO.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\SaleDto.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\dto\SaleRequestDTO.java
@@ -39,6 +40,7 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\entities\SaleDetail.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\entities\Size.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\entities\Stock.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\enums\DeliveryStatus.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\exception\ApiNotFoundException.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\exception\ApiNotFoundExceptionRespone.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\exception\ErrorResponse.java
@@ -51,6 +53,7 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\mapper\MenuFacturerMapper.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\mapper\ProductMapper.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\mapper\ProductVariantMapper.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\mapper\SaleMapper.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\mapper\SizeMapper.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\CategoryRepository.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\CategoryTypeRepository.java

@@ -84,7 +84,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private User updateUser(User user, Oauth2UserInfoDto userInfo) {
         user.setName(userInfo.getName());
-        user.setPicture(userInfo.getPicture());
+//        user.setPicture(userInfo.getPicture());
         user.setProvider(userInfo.getProvider());
 
         log.info("Updating existing user: {}", userInfo.getEmail());

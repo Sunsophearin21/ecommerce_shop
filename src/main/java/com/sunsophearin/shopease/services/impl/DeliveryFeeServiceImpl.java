@@ -22,7 +22,7 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
     @Override
     public List<DeliveryFee> getAllDeliveryFees() {
-        return List.of();
+        return deliveryFeeRepository.findAll();
     }
 
     @Override

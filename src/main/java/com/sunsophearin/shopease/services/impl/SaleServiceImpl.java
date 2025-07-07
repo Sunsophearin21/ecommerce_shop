@@ -2,8 +2,11 @@ package com.sunsophearin.shopease.services.impl;
 
 import com.sunsophearin.shopease.dto.SaleDetailDTO;
 import com.sunsophearin.shopease.dto.SaleDto;
+import com.sunsophearin.shopease.dto.response.SaleDtoResponse;
 import com.sunsophearin.shopease.entities.*;
+import com.sunsophearin.shopease.enums.DeliveryStatus;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
+import com.sunsophearin.shopease.mapper.SaleMapper;
 import com.sunsophearin.shopease.repositories.*;
 import com.sunsophearin.shopease.security.entities.User;
 import com.sunsophearin.shopease.security.service.impl.UserServiceImpl;
@@ -29,6 +32,7 @@ public class SaleServiceImpl implements SaleService {
     private final UserServiceImpl userService;
     private final ColorRepository colorRepository;
     private final SizeRepository sizeRepository;
+    private final SaleMapper saleMapper;
 
     @Override
     public void enrichSaleDetailDTOs(SaleDto saleDto) {
@@ -134,6 +138,18 @@ public class SaleServiceImpl implements SaleService {
         return productTotal.add(orderDeliveryFee);
     }
 
+    @Override
+    public List<SaleDtoResponse> getSalesByUserNameAndDeliveryStatus(String userName, DeliveryStatus deliveryStatus) {
+        User user = userService.findUserName(userName);
+        return saleMapper.salesToSaleDtos(saleRepo.findByUserIdAndDeliveryStatus(user.getId(),deliveryStatus));
+    }
+
+    @Override
+    public List<SaleDtoResponse> getAllSale() {
+
+       return saleMapper.salesToSaleDtos(saleRepo.findAll());
+    }
+
     // --- Helper methods ---
 
     private Map<Long, ProductVariant> fetchVariants(SaleDto saleDto) {
@@ -233,6 +249,9 @@ public class SaleServiceImpl implements SaleService {
         saleDetail.setSize(stock.getSize());
         saleDetail.setQuantity(detail.getQuantity());
         saleDetail.setFinalPrice(variant.getProduct().getFinalPrice().doubleValue());
+        saleDetail.setDiscount(variant.getProduct().getDiscount().doubleValue());
+        saleDetail.setPrice(variant.getProduct().getPrice().doubleValue());
+        saleDetail.setColor(variant.getColor());
         return saleDetail;
     }
 
@@ -246,6 +265,7 @@ public class SaleServiceImpl implements SaleService {
         sale.setAddress(result.address);
         sale.setLatitude(result.latitude);
         sale.setLongitude(result.longitude);
+        sale.setDeliveryStatus(DeliveryStatus.PENDING);
         return sale;
     }
 

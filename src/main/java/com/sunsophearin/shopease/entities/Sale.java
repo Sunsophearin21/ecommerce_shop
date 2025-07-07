@@ -1,8 +1,11 @@
 package com.sunsophearin.shopease.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sunsophearin.shopease.enums.DeliveryStatus;
 import com.sunsophearin.shopease.security.entities.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,12 +22,15 @@ public class Sale {
     private Long id;
 
     // Reference to the customer/user who placed the order
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
+//    @JsonIgnore
     private User user;
 
     // Sale details (order items)
-    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL)
+    @ToString.Exclude
+//    @JsonIgnore
     private List<SaleDetail> saleDetails;
 
     // Total quantity of all items in the sale
@@ -50,8 +56,9 @@ public class Sale {
     private String status;
 
     // Delivery status (optional)
+    @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", length = 20)
-    private String deliveryStatus;
+    private DeliveryStatus deliveryStatus;
 
     // Notes (optional, for admin/customer remarks)
     @Column(name = "notes", length = 255)

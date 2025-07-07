@@ -22,5 +22,10 @@ public class DeliveryFeeController {
     ) throws IOException {
         return ResponseEntity.ok(deliveryFeeService.createDeliveryFee(dto, file));
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAll(){
+        return ResponseEntity.ok(deliveryFeeService.getAllDeliveryFees());
+    }
 }
 

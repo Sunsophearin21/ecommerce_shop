@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-07T16:39:57+0700",
+    date = "2025-07-14T15:44:07+0700",
     comments = "version: 1.6.3, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
@@ -22,6 +22,7 @@ public class ColorMapperImpl implements ColorMapper {
         Color color = new Color();
 
         color.setName( dto.getName() );
+        color.setColorCode( dto.getColorCode() );
 
         return color;
     }
@@ -35,6 +36,7 @@ public class ColorMapperImpl implements ColorMapper {
         ColorDto colorDto = new ColorDto();
 
         colorDto.setName( color.getName() );
+        colorDto.setColorCode( color.getColorCode() );
 
         return colorDto;
     }

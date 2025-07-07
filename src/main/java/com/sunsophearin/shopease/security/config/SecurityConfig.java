@@ -54,7 +54,7 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/topic/**",
                                 "/app/**",
-                                "api/delivery-fee/**"
+                                "/api/delivery-fee/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

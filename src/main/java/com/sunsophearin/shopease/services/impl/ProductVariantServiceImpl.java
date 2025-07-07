@@ -1,7 +1,6 @@
 package com.sunsophearin.shopease.services.impl;
 
 import com.sunsophearin.shopease.dto.ProductVariantDto;
-import com.sunsophearin.shopease.dto.ProductVariantDto2;
 import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
 import com.sunsophearin.shopease.mapper.ProductVariantMapper;

@@ -4,6 +4,7 @@ com\sunsophearin\shopease\repositories\CategoryRepository.class
 com\sunsophearin\shopease\mapper\SizeMapper.class
 com\sunsophearin\shopease\dto\MenuFactureDto.class
 com\sunsophearin\shopease\repositories\ProductVariantRepository.class
+com\sunsophearin\shopease\enums\DeliveryStatus.class
 com\sunsophearin\shopease\repositories\ColorRepository.class
 com\sunsophearin\shopease\security\config\CorsConfig.class
 com\sunsophearin\shopease\exception\ApiNotFoundExceptionRespone.class
@@ -33,6 +34,7 @@ com\sunsophearin\shopease\mapper\DeliveryFeMapper.class
 com\sunsophearin\shopease\dto\SaleDto.class
 com\sunsophearin\shopease\security\oauth2\OAuth2AuthenticationSuccessHandler.class
 com\sunsophearin\shopease\security\service\impl\CustomOAuth2UserService.class
+com\sunsophearin\shopease\mapper\SaleMapperImpl.class
 com\sunsophearin\shopease\specification\ProductFilter.class
 com\sunsophearin\shopease\entities\Product.class
 com\sunsophearin\shopease\dto\ProductDtoRespone.class
@@ -57,7 +59,6 @@ com\sunsophearin\shopease\services\SizeService.class
 com\sunsophearin\shopease\ShopeaseApplication.class
 com\sunsophearin\shopease\dto\ProductVariantDto.class
 com\sunsophearin\shopease\services\CategoryTypeService.class
-com\sunsophearin\shopease\dto\ProductVariantDto2.class
 com\sunsophearin\shopease\entities\ImportStock$ImportStockBuilder.class
 com\sunsophearin\shopease\services\ProductVariantService.class
 com\sunsophearin\shopease\security\entities\Role$RoleBuilder.class
@@ -81,11 +82,13 @@ com\sunsophearin\shopease\services\impl\UploadImageFileServiceImpl.class
 com\sunsophearin\shopease\repositories\DeliveryFeeRepository.class
 com\sunsophearin\shopease\mapper\CategoryMapperImpl.class
 com\sunsophearin\shopease\services\DeliveryFeeService.class
+com\sunsophearin\shopease\dto\response\SaleDtoResponse.class
 com\sunsophearin\shopease\security\JwtAuthenticationEntryPoint.class
 com\sunsophearin\shopease\services\impl\CategoryServiceImpl.class
 com\sunsophearin\shopease\services\impl\ProductVariantServiceImpl.class
 com\sunsophearin\shopease\repositories\StockRepository.class
 com\sunsophearin\shopease\security\dto\Oauth2UserInfoDto$Oauth2UserInfoDtoBuilder.class
+com\sunsophearin\shopease\dto\response\SaleDetailDtoResponse.class
 com\sunsophearin\shopease\repositories\SaleRepository.class
 com\sunsophearin\shopease\dto\ImportStockRequestDTO.class
 com\sunsophearin\shopease\dto\PaymentRequest.class
@@ -112,6 +115,7 @@ com\sunsophearin\shopease\security\entities\Role.class
 com\sunsophearin\shopease\mapper\ColorMapperImpl.class
 com\sunsophearin\shopease\dto\ProductDto.class
 com\sunsophearin\shopease\entities\Color.class
+com\sunsophearin\shopease\mapper\SaleMapper.class
 com\sunsophearin\shopease\exception\ResoureApiNotFound.class
 com\sunsophearin\shopease\services\impl\ColorServiceImpl.class
 com\sunsophearin\shopease\repositories\SizeRepository.class

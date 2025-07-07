@@ -17,6 +17,7 @@ public class Color {
     private Long id;
     @Column(name = "color_name")
     private String name;
+    private String colorCode;
     @OneToMany(mappedBy = "color",cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
