@@ -1,6 +1,7 @@
 package com.sunsophearin.shopease.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
