@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
         saleService.enrichSaleDetailDTOs(saleDto);
 
         // Calculate total price after enrichment
-        BigDecimal totalAmount = saleService.calculateTotalPrice(saleDto);
+        BigDecimal totalAmount = saleService.calculateTotalPriceWithDelivery(saleDto);
         log.info("total amount {}", totalAmount);
 
         IndividualInfo qrInfo = buildQrInfo(totalAmount);
@@ -64,7 +64,7 @@ public class PaymentServiceImpl implements PaymentService {
             String qr = qrResponse.getData().getQr();
             String md5 = qrResponse.getData().getMd5();
 
-            schedulePaymentPolling(saleDto, userEmail, md5);
+            schedulePaymentPolling(saleDto, userEmail, md5,totalAmount);
             return Map.of("qr", qr, "md5", md5);
         }
 
@@ -84,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
         return info;
     }
 
-    private void schedulePaymentPolling(SaleDto saleDto, String userEmail, String md5) {
+    private void schedulePaymentPolling(SaleDto saleDto, String userEmail, String md5,BigDecimal totalPrice) {
         if (runningTasks.containsKey(md5)) {
             log.info("Polling already scheduled for md5: {}", md5);
             return;
@@ -101,13 +101,13 @@ public class PaymentServiceImpl implements PaymentService {
 
                     saleService.enrichSaleDetailDTOs(saleDto);
 
-                    BigDecimal totalAmount = saleService.calculateTotalPrice(saleDto);
+//                    BigDecimal totalAmount = saleService.calculateTotalPrice(saleDto);
                     String notifyMsg = TelegramMessageBuilder.buildOrderNotification(
                             savedSale, // Pass transactionId from entity
                             saleDto,
                             userEmail,
                             "PAID",
-                            totalAmount
+                            totalPrice
                     );
                     telegramBotService.sendOrderNotification(notifyMsg);
 

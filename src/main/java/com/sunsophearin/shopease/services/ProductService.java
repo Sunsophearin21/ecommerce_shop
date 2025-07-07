@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface ProductService {
     Product createProduct(ProductDto dto);
-    List<Product> getProducts();
+    List<ProductDtoRespone> getProducts();
     Product getProductById(Long id);
     List<Product> searchProducts(productFilter2 filter);
     List<Product> getProductsByVariant(Long productId,List<Long> variantIds);

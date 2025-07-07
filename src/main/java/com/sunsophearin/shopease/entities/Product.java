@@ -1,7 +1,4 @@
 package com.sunsophearin.shopease.entities;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -46,6 +43,8 @@ public class Product {
     private MenuFacturer menuFacturer;
     @Column(name = "product_discount")
     private Integer discount = 0; // បញ្ចុះតម្លៃជាភាគរយ (%), default = 0
+    @Column(name = "delivery_fee", precision = 10, scale = 2, nullable = true)
+    private BigDecimal deliveryFee;
 
     @Transient //@Transient បញ្ជាក់ថា finalPrice មិនត្រូវរក្សាទុកក្នុង database, គឺគ្រាន់តែគណនាឡើងសម្រាប់ API/json response ប៉ុណ្ណោះ
     public BigDecimal getFinalPrice() {
