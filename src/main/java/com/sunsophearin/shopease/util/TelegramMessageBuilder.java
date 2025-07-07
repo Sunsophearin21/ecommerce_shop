@@ -15,7 +15,11 @@ public class TelegramMessageBuilder {
     ) {
         StringBuilder sb = new StringBuilder();
         sb.append("<b>🛒 New Order Received!</b>\n\n");
-        sb.append("<b>Customer:</b> ").append(userEmail).append("\n");
+        sb.append("<b>Customer :</b> \n");
+        sb.append("<b>Email:</b> ").append(userEmail).append("\n");
+        sb.append("<b>Name:</b> ").append(saleDto.getUsername()).append("\n");
+        sb.append("<b>Address:</b> ").append(saleDto.getAddress()).append("\n");
+        sb.append("<b>Phone Number:</b> ").append(saleDto.getPhoneNumber()).append("\n");
         sb.append("<b>Order ID:</b> ").append(sale.getOrderId()).append("\n");
         sb.append("<b>Date:</b> ").append(DateFormatUtil.format(sale.getCreateAt())).append("\n");
         sb.append("<b>Payment Status:</b> ").append(paymentStatus).append("\n\n");

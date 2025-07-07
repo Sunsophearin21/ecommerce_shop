@@ -14,5 +14,6 @@ public interface SaleService {
     void enrichSaleDetailDTOs(SaleDto saleDto);
     Sale processSale(SaleDto saleDto, String userEmail);
     BigDecimal calculateTotalPrice(SaleDto saleDto);
+    BigDecimal calculateTotalPriceWithDelivery(SaleDto saleDto);
 
 }

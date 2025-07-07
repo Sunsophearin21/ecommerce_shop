@@ -109,6 +109,30 @@ public class SaleServiceImpl implements SaleService {
                 .map(detail -> detail.getUnitPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+    @Override
+    public BigDecimal calculateTotalPriceWithDelivery(SaleDto saleDto) {
+        Map<Long, ProductVariant> variantMap = fetchVariants(saleDto);
+        processItems(saleDto, variantMap);
+        BigDecimal productTotal = calculateTotalPrice(saleDto);
+
+        // Collect delivery fees from all products in the order
+        Set<BigDecimal> deliveryFees = saleDto.getSaleDetailDTOS().stream()
+                .map(detail -> {
+                    // You may need to fetch the product entity here if not already available
+                    Product product = productRepository.findById(detail.getProductId()).orElse(null);
+                    return product != null ? product.getDeliveryFee() : BigDecimal.ZERO;
+                })
+                .filter(Objects::nonNull)
+                .filter(fee -> fee.compareTo(BigDecimal.ZERO) > 0)
+                .collect(Collectors.toSet());
+
+        // Choose your business rule: e.g., highest delivery fee among products
+        BigDecimal orderDeliveryFee = deliveryFees.stream()
+                .max(BigDecimal::compareTo)
+                .orElse(BigDecimal.ZERO);
+
+        return productTotal.add(orderDeliveryFee);
+    }
 
     // --- Helper methods ---
 
@@ -125,15 +149,24 @@ public class SaleServiceImpl implements SaleService {
         List<Stock> stocksToUpdate = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
         int totalQty = 0;
+        String numberPhone = saleDto.getPhoneNumber();
+        String address = saleDto.getAddress();
+        double latitude = saleDto.getLatitude();
+        double longitude = saleDto.getLongitude();
         List<SaleDetail> saleDetails = new ArrayList<>();
+
+        // Collect delivery fees from all products in the order
+        Set<BigDecimal> deliveryFees = new HashSet<>();
 
         for (SaleDetailDTO detail : saleDto.getSaleDetailDTOS()) {
             ProductVariant variant = getVariantOrThrow(detail, variantMap);
+
             if (detail.getColorId() != null && variant.getColor() != null &&
                     !detail.getColorId().equals(variant.getColor().getId())) {
                 throw new RuntimeException("Color mismatch: variant colorId=" + variant.getColor().getId() +
                         ", but requested colorId=" + detail.getColorId());
             }
+
             Stock stock = getStockOrThrow(detail, variant);
             validateStockQuantity(stock, detail.getQuantity());
 
@@ -141,10 +174,38 @@ public class SaleServiceImpl implements SaleService {
                     .multiply(BigDecimal.valueOf(detail.getQuantity()));
             totalPrice = totalPrice.add(itemPrice);
             totalQty += detail.getQuantity();
+
+            // Collect delivery fee for this product if present
+            BigDecimal productDeliveryFee = variant.getProduct().getDeliveryFee();
+            if (productDeliveryFee != null && productDeliveryFee.compareTo(BigDecimal.ZERO) > 0) {
+                deliveryFees.add(productDeliveryFee);
+            }
+
             saleDetails.add(createSaleDetail(variant, stock, detail));
         }
-        return new ProcessingResult(stocksToUpdate, totalPrice, totalQty, saleDetails);
+
+        // Decide on the delivery fee for the whole order
+        // Example: Use the highest delivery fee among all products, or a fixed value
+        BigDecimal orderDeliveryFee = deliveryFees.stream()
+                .max(BigDecimal::compareTo)
+                .orElse(BigDecimal.ZERO);
+
+        totalPrice = totalPrice.add(orderDeliveryFee);
+
+        // Optionally, you can return the delivery fee as part of the ProcessingResult
+        return new ProcessingResult(
+                stocksToUpdate,
+                totalPrice,
+                totalQty,
+                saleDetails,
+                numberPhone,
+                address,
+                latitude,
+                longitude,
+                orderDeliveryFee // add this to your ProcessingResult if needed
+        );
     }
+
 
     private ProductVariant getVariantOrThrow(SaleDetailDTO detail, Map<Long, ProductVariant> variantMap) {
         return Optional.ofNullable(variantMap.get(detail.getVariantId()))
@@ -181,7 +242,10 @@ public class SaleServiceImpl implements SaleService {
         sale.setUser(user);
         sale.setFinalPrice(result.totalPrice());
         sale.setQuantity(result.totalQty());
-        // transactionId will be set in processSale if missing
+        sale.setPhoneNumber(result.numberPhone);
+        sale.setAddress(result.address);
+        sale.setLatitude(result.latitude);
+        sale.setLongitude(result.longitude);
         return sale;
     }
 
@@ -195,6 +259,10 @@ public class SaleServiceImpl implements SaleService {
             List<Stock> stocksToUpdate,
             BigDecimal totalPrice,
             int totalQty,
-            List<SaleDetail> saleDetails
-    ) {}
+            List<SaleDetail> saleDetails,
+            String numberPhone,
+            String address,
+            double latitude,
+            double longitude,
+            BigDecimal orderDeliveryFee) {}
 }

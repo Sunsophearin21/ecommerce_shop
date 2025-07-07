@@ -49,22 +49,6 @@ public class Sale {
     @Column(name = "status", length = 20)
     private String status;
 
-    // Payment method (optional, recommended)
-    @Column(name = "payment_method", length = 32)
-    private String paymentMethod;
-
-    // Payment status (optional, recommended)
-    @Column(name = "payment_status", length = 20)
-    private String paymentStatus;
-
-    // Currency (optional, recommended)
-    @Column(name = "currency", length = 8)
-    private String currency;
-
-    // Delivery address (optional, for shipping)
-    @Column(name = "delivery_address", length = 255)
-    private String deliveryAddress;
-
     // Delivery status (optional)
     @Column(name = "delivery_status", length = 20)
     private String deliveryStatus;
@@ -83,6 +67,16 @@ public class Sale {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sale_updateAt")
     private Date updateAt;
+    @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column(nullable = false)
+    private String address;
+    @Column(nullable = false)
+    private double latitude;
+    @Column(nullable = false)
+    private double longitude;
+
 
     @PrePersist
     protected void onCreate() {

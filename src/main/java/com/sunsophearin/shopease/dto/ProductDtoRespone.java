@@ -15,6 +15,8 @@ public class ProductDtoRespone {
     private BigDecimal price;
     private Integer discount;       // ✅ បញ្ចុះតម្លៃ (%)
     private BigDecimal finalPrice;  // ✅ តម្លៃក្រោយបញ្ចុះ
+    private BigDecimal deliveryFee;
+
 
     private Date createAt;
     private Date updateAt;
