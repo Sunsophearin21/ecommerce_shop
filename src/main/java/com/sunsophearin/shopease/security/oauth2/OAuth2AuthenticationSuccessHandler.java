@@ -39,11 +39,11 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         String jwt = jwtUtil.generateToken(userDetails);
 
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
-                .httpOnly(false)
+                .httpOnly(true)
                 .secure(true) // Set to true in production (with HTTPS)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
