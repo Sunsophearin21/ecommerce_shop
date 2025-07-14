@@ -46,7 +46,7 @@ telegram:
   bot:
     token: ${BOT_TOKEN}
     chat-id: ${BOT_ID}
-ALLOWED_ORIGINS: ${ALLOWED_ORIGINS_FRONTEND}
+ALLOWED_ORIGINS_FRONTEND: ${ALLOWED_ORIGINS_FRONTEND}
 cloudinary:
   cloud_name: ${CLOUDINARY_NAME}
   api_key: ${CLOUDINARY_API_KEY}

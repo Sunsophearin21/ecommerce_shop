@@ -10,7 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${ALLOWED_ORIGINS}")
+    @Value("${ALLOWED_ORIGINS_FRONTEND}")
     private String allowedOrigins;
 
     @Override
