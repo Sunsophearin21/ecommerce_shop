@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.entities;
 import com.sunsophearin.shopease.enums.DeliveryStatus;
 import com.sunsophearin.shopease.security.entities.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
