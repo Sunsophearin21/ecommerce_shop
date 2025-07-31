@@ -1,6 +1,7 @@
 package com.sunsophearin.shopease.controllers;
 
 import com.sunsophearin.shopease.dto.*;
+import com.sunsophearin.shopease.dto.response.*;
 import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.mapper.ProductMapper;
 import com.sunsophearin.shopease.services.ProductService;
@@ -87,9 +88,29 @@ public class ProductController {
         ProductDtoRespone response = productService.findVariant(productId, colorId, sizeId);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/{categoryId}/product-detail-page/{productId}")
+    public ResponseEntity<?> getProductDetailWithCategory(
+            @PathVariable("category") Long categoryId,
+            @PathVariable("productId") Long productId,
+            @RequestParam(value = "color_id", required = false) Long colorId,
+            @RequestParam(value = "size_id", required = false) Long sizeId) {
+
+        // ស្រាច់ពិនិត្យប្រភេទ (category) បើចង់បាន
+        // System.out.println("Category: " + category);
+
+        ProductDtoRespone response = productService.findVariant(productId, colorId, sizeId);
+        return ResponseEntity.ok(response);
+    }
     @GetMapping("/by-category-type/{categoryTypeId}")
     public List<ProductDtoRespone> getProductsByCategoryType(@PathVariable Long categoryTypeId) {
         List<Product> products = productService.getProductByCategoryType(categoryTypeId);
+        return products.stream()
+                .map(productMapper::toDtoList)
+                .collect(Collectors.toList());
+    }
+    @GetMapping("/by-category-item/{categoryItemId}")
+    public List<ProductDtoRespone> getProductsByCategoryItem(@PathVariable Long categoryItemId) {
+        List<Product> products = productService.getProductByCategoryItem(categoryItemId);
         return products.stream()
                 .map(productMapper::toDtoList)
                 .collect(Collectors.toList());
@@ -109,8 +130,4 @@ public class ProductController {
         return ResponseEntity.ok(productVariantService.update(id,dto));
     }
 
-//    private ProductVariantDto convertToProductVariant(String peoductVariantDtoObj) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        return objectMapper.readValue(peoductVariantDtoObj, ProductVariantDto.class);
-//    }
 }

@@ -1,17 +1,11 @@
 package com.sunsophearin.shopease.mapper;
 
-import com.sunsophearin.shopease.dto.CategoryDto;
-import com.sunsophearin.shopease.dto.CategoryTypeDto;
 import com.sunsophearin.shopease.dto.MenuFactureDto;
 import com.sunsophearin.shopease.dto.ProductDto;
-import com.sunsophearin.shopease.dto.ProductDtoRespone;
-import com.sunsophearin.shopease.entities.Category;
-import com.sunsophearin.shopease.entities.CategoryType;
+import com.sunsophearin.shopease.dto.response.ProductDtoRespone;
 import com.sunsophearin.shopease.entities.MenuFacturer;
 import com.sunsophearin.shopease.entities.Product;
 import com.sunsophearin.shopease.entities.ProductVariant;
-import com.sunsophearin.shopease.services.CategoryService;
-import com.sunsophearin.shopease.services.CategoryTypeService;
 import com.sunsophearin.shopease.services.MenuFacturerService;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,16 +15,18 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-15T01:13:59+0700",
+    date = "2025-07-31T15:46:55+0700",
     comments = "version: 1.6.3, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {
 
     @Autowired
-    private CategoryService categoryService;
+    private CategoryMapper categoryMapper;
     @Autowired
-    private CategoryTypeService categoryTypeService;
+    private CategoryTypeMapper categoryTypeMapper;
+    @Autowired
+    private CategoryItemMapper categoryItemMapper;
     @Autowired
     private MenuFacturerService menuFacturerService;
 
@@ -42,8 +38,8 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product product = new Product();
 
-        product.setCategoryType( categoryTypeService.getCategoryTypeById( dto.getCategoryTypeId() ) );
-        product.setCategory( categoryService.getCategoryById( dto.getCategoryId() ) );
+        product.setCategoryType( map( dto.getCategoryTypeId() ) );
+        product.setCategory( categoryTypeMapper.map( dto.getCategoryId() ) );
         product.setMenuFacturer( menuFacturerService.getMenuFacById( dto.getMenuFacturerId() ) );
         product.setName( dto.getName() );
         product.setDescription( dto.getDescription() );
@@ -61,8 +57,9 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductDtoRespone productDtoRespone = new ProductDtoRespone();
 
-        productDtoRespone.setCategory( categoryToCategoryDto( product.getCategory() ) );
-        productDtoRespone.setCategoryType( categoryTypeToCategoryTypeDto( product.getCategoryType() ) );
+        productDtoRespone.setCategory( categoryMapper.categoryToCategoryDto( product.getCategory() ) );
+        productDtoRespone.setCategoryType( categoryTypeMapper.toDto( product.getCategoryType() ) );
+        productDtoRespone.setCategoryItem( categoryItemMapper.toDto( product.getCategoryItem() ) );
         productDtoRespone.setMenuFacturer( menuFacturerToMenuFactureDto( product.getMenuFacturer() ) );
         List<ProductVariant> list = product.getProductVariants();
         if ( list != null ) {
@@ -80,35 +77,23 @@ public class ProductMapperImpl implements ProductMapper {
 
         productDtoRespone.setFinalPrice( product.getFinalPrice() );
 
+        setSlug( product, productDtoRespone );
+
         return productDtoRespone;
     }
 
-    protected CategoryDto categoryToCategoryDto(Category category) {
-        if ( category == null ) {
+    @Override
+    public List<ProductDtoRespone> toDtoList(List<Product> products) {
+        if ( products == null ) {
             return null;
         }
 
-        CategoryDto categoryDto = new CategoryDto();
-
-        categoryDto.setName( category.getName() );
-        categoryDto.setCode( category.getCode() );
-        categoryDto.setDescription( category.getDescription() );
-
-        return categoryDto;
-    }
-
-    protected CategoryTypeDto categoryTypeToCategoryTypeDto(CategoryType categoryType) {
-        if ( categoryType == null ) {
-            return null;
+        List<ProductDtoRespone> list = new ArrayList<ProductDtoRespone>( products.size() );
+        for ( Product product : products ) {
+            list.add( toDtoList( product ) );
         }
 
-        CategoryTypeDto categoryTypeDto = new CategoryTypeDto();
-
-        categoryTypeDto.setName( categoryType.getName() );
-        categoryTypeDto.setCode( categoryType.getCode() );
-        categoryTypeDto.setDescription( categoryType.getDescription() );
-
-        return categoryTypeDto;
+        return list;
     }
 
     protected MenuFactureDto menuFacturerToMenuFactureDto(MenuFacturer menuFacturer) {

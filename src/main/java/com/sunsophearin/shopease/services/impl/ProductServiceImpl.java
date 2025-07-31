@@ -2,7 +2,7 @@ package com.sunsophearin.shopease.services.impl;
 
 import com.sunsophearin.shopease.dto.ImportStockRequestDTO;
 import com.sunsophearin.shopease.dto.ProductDto;
-import com.sunsophearin.shopease.dto.ProductDtoRespone;
+import com.sunsophearin.shopease.dto.response.ProductDtoRespone;
 import com.sunsophearin.shopease.entities.*;
 import com.sunsophearin.shopease.exception.ResoureApiNotFound;
 import com.sunsophearin.shopease.mapper.ProductMapper;
@@ -115,6 +115,15 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = productRepository.findByCategoryTypeId(cateId);
         if (products.isEmpty()) {
             throw new ResoureApiNotFound("Product with category type", cateId);
+        }
+        return products;
+    }
+
+    @Override
+    public List<Product> getProductByCategoryItem(Long categoryItemId) {
+        List<Product> products = productRepository.findByCategoryItemId(categoryItemId);
+        if (products.isEmpty()) {
+            throw new ResoureApiNotFound("Product with category type", categoryItemId);
         }
         return products;
     }

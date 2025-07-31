@@ -1,6 +1,5 @@
 package com.sunsophearin.shopease.security.oauth2;
 
-import com.sunsophearin.shopease.security.oauth2.UserPrincipal;
 import com.sunsophearin.shopease.security.service.impl.UserDetailsServiceImpl;
 import com.sunsophearin.shopease.security.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,12 +33,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         // ✅ Load full user details including roles
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        // ✅ Generate token with roles included
+        // token with roles included
         String jwt = jwtUtil.generateToken(userDetails);
 
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
                 .httpOnly(true)
-                .secure(true) // Set to true in production (with HTTPS)
+                .secure(true)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .sameSite("None")

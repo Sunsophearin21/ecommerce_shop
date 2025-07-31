@@ -32,4 +32,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+    @Column(name = "first_purchase", nullable = false)
+    private boolean firstPurchase = true;
 }

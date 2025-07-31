@@ -1,6 +1,5 @@
 package com.sunsophearin.shopease.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sunsophearin.shopease.enums.DeliveryStatus;
 import com.sunsophearin.shopease.security.entities.User;
 import jakarta.persistence.*;

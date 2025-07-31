@@ -35,6 +35,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "categoryType_id",nullable = false)
     private CategoryType categoryType;
+    @ManyToOne
+    @JoinColumn(name = "category_item_id") // it wants this column in table
+    private CategoryItem categoryItem;
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ProductVariant> productVariants;
