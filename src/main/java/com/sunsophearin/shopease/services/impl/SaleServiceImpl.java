@@ -206,14 +206,15 @@ public class SaleServiceImpl implements SaleService {
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
 
-        BigDecimal total = productTotal.add(maxDeliveryFee);
+        BigDecimal discountedTotal = productTotal;
 
         if (user != null && user.isFirstPurchase()) {
-            total = total.multiply(BigDecimal.valueOf(0.9))
-                    .setScale(2, RoundingMode.HALF_UP);
+            discountedTotal = productTotal.multiply(BigDecimal.valueOf(0.9)).setScale(2, RoundingMode.HALF_UP);
         }
 
+        BigDecimal total = discountedTotal.add(maxDeliveryFee);
         return total;
+
     }
 
     @Override
