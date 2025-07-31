@@ -2,6 +2,7 @@ package com.sunsophearin.shopease.services.impl;
 
 import com.sunsophearin.shopease.dto.SaleDto;
 import com.sunsophearin.shopease.entities.Sale;
+import com.sunsophearin.shopease.security.entities.User;
 import com.sunsophearin.shopease.security.service.impl.UserServiceImpl;
 import com.sunsophearin.shopease.services.PaymentService;
 import com.sunsophearin.shopease.services.SaleService;
@@ -48,13 +49,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public Map<String, Object> generateKhqr(SaleDto saleDto, String userEmail) {
-        userService.findUserName(userEmail);
+        final User user = userService.findUserName(userEmail);
 
         // Enrich sale details with product info (names, prices, etc.)
         saleService.enrichSaleDetailDTOs(saleDto);
 
         // Calculate total price after enrichment
-        BigDecimal totalAmount = saleService.calculateTotalPriceWithDelivery(saleDto);
+        BigDecimal totalAmount = saleService.calculateTotalPriceWithDelivery(saleDto,user);
         log.info("total amount {}", totalAmount);
 
         IndividualInfo qrInfo = buildQrInfo(totalAmount);

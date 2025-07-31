@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+
 @Entity
 @Table(name = "categoty_types")
 @Data
@@ -20,4 +22,6 @@ public class CategoryType {
     @JoinColumn(name = "category_id")
     @JsonIgnore
     private Category category;
+    @OneToMany(mappedBy = "categoryType", cascade = CascadeType.ALL)
+    private List<CategoryItem> categoryItems;
 }

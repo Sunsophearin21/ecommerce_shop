@@ -2,7 +2,7 @@ package com.sunsophearin.shopease.services;
 
 import com.sunsophearin.shopease.dto.ImportStockRequestDTO;
 import com.sunsophearin.shopease.dto.ProductDto;
-import com.sunsophearin.shopease.dto.ProductDtoRespone;
+import com.sunsophearin.shopease.dto.response.ProductDtoRespone;
 import com.sunsophearin.shopease.entities.ImportStock;
 import com.sunsophearin.shopease.entities.Product;
 import com.sunsophearin.shopease.entities.Stock;
@@ -18,6 +18,7 @@ public interface ProductService {
     List<Product> getProductsByVariant(Long productId,List<Long> variantIds);
     ProductDtoRespone findVariant(Long productId, Long color_id,Long size_id);
     List<Product> getProductByCategoryType(Long cateId);
+    List<Product> getProductByCategoryItem(Long categoryItemId);
     ImportStock importProduct(ImportStockRequestDTO dto);
     Stock getStockById(Long id);
 }

@@ -35,12 +35,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         // ✅ Load full user details including roles
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        // ✅ Generate token with roles included
+        // token with roles included
         String jwt = jwtUtil.generateToken(userDetails);
 
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
                 .httpOnly(true)
-                .secure(true) // Set to true in production (with HTTPS)
+                .secure(true)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .sameSite("None")

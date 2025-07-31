@@ -7,7 +7,7 @@ import com.sunsophearin.shopease.services.SizeService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ColorService.class, SizeService.class})
+@Mapper(componentModel = "spring", uses = {ColorService.class, SizeService.class,StockMapper.class,})
 public interface ProductVariantMapper {
 
     @Mapping(target = "color", source = "colorId")

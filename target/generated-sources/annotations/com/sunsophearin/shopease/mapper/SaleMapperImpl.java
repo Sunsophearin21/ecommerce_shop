@@ -15,11 +15,40 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-07-15T01:13:59+0700",
+    date = "2025-07-30T16:55:13+0700",
     comments = "version: 1.6.3, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class SaleMapperImpl implements SaleMapper {
+
+    @Override
+    public SaleDtoResponse saleToSaleDto(Sale sale) {
+        if ( sale == null ) {
+            return null;
+        }
+
+        SaleDtoResponse saleDtoResponse = new SaleDtoResponse();
+
+        saleDtoResponse.setId( sale.getId() );
+        saleDtoResponse.setOrderId( sale.getOrderId() );
+        saleDtoResponse.setTransactionId( sale.getTransactionId() );
+        saleDtoResponse.setStatus( sale.getStatus() );
+        if ( sale.getDeliveryStatus() != null ) {
+            saleDtoResponse.setDeliveryStatus( sale.getDeliveryStatus().name() );
+        }
+        saleDtoResponse.setNotes( sale.getNotes() );
+        saleDtoResponse.setQuantity( sale.getQuantity() );
+        saleDtoResponse.setFinalPrice( sale.getFinalPrice() );
+        saleDtoResponse.setPhoneNumber( sale.getPhoneNumber() );
+        saleDtoResponse.setAddress( sale.getAddress() );
+        saleDtoResponse.setLatitude( sale.getLatitude() );
+        saleDtoResponse.setLongitude( sale.getLongitude() );
+        saleDtoResponse.setCreateAt( sale.getCreateAt() );
+        saleDtoResponse.setUpdateAt( sale.getUpdateAt() );
+        saleDtoResponse.setSaleDetails( saleDetailsToSaleDetailDtos( sale.getSaleDetails() ) );
+
+        return saleDtoResponse;
+    }
 
     @Override
     public List<SaleDtoResponse> salesToSaleDtos(List<Sale> sales) {
@@ -29,7 +58,21 @@ public class SaleMapperImpl implements SaleMapper {
 
         List<SaleDtoResponse> list = new ArrayList<SaleDtoResponse>( sales.size() );
         for ( Sale sale : sales ) {
-            list.add( saleToSaleDtoResponse( sale ) );
+            list.add( saleToSaleDto( sale ) );
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<SaleDetailDtoResponse> saleDetailsToSaleDetailDtos(List<SaleDetail> saleDetails) {
+        if ( saleDetails == null ) {
+            return null;
+        }
+
+        List<SaleDetailDtoResponse> list = new ArrayList<SaleDetailDtoResponse>( saleDetails.size() );
+        for ( SaleDetail saleDetail : saleDetails ) {
+            list.add( saleDetailToSaleDetailDto( saleDetail ) );
         }
 
         return list;
@@ -62,48 +105,6 @@ public class SaleMapperImpl implements SaleMapper {
         saleDetailDtoResponse.setQuantity( saleDetail.getQuantity() );
 
         return saleDetailDtoResponse;
-    }
-
-    @Override
-    public List<SaleDetailDtoResponse> saleDetailsToSaleDetailDtos(List<SaleDetail> saleDetails) {
-        if ( saleDetails == null ) {
-            return null;
-        }
-
-        List<SaleDetailDtoResponse> list = new ArrayList<SaleDetailDtoResponse>( saleDetails.size() );
-        for ( SaleDetail saleDetail : saleDetails ) {
-            list.add( saleDetailToSaleDetailDto( saleDetail ) );
-        }
-
-        return list;
-    }
-
-    protected SaleDtoResponse saleToSaleDtoResponse(Sale sale) {
-        if ( sale == null ) {
-            return null;
-        }
-
-        SaleDtoResponse saleDtoResponse = new SaleDtoResponse();
-
-        saleDtoResponse.setId( sale.getId() );
-        saleDtoResponse.setOrderId( sale.getOrderId() );
-        saleDtoResponse.setTransactionId( sale.getTransactionId() );
-        saleDtoResponse.setStatus( sale.getStatus() );
-        if ( sale.getDeliveryStatus() != null ) {
-            saleDtoResponse.setDeliveryStatus( sale.getDeliveryStatus().name() );
-        }
-        saleDtoResponse.setNotes( sale.getNotes() );
-        saleDtoResponse.setQuantity( sale.getQuantity() );
-        saleDtoResponse.setFinalPrice( sale.getFinalPrice() );
-        saleDtoResponse.setPhoneNumber( sale.getPhoneNumber() );
-        saleDtoResponse.setAddress( sale.getAddress() );
-        saleDtoResponse.setLatitude( sale.getLatitude() );
-        saleDtoResponse.setLongitude( sale.getLongitude() );
-        saleDtoResponse.setCreateAt( sale.getCreateAt() );
-        saleDtoResponse.setUpdateAt( sale.getUpdateAt() );
-        saleDtoResponse.setSaleDetails( saleDetailsToSaleDetailDtos( sale.getSaleDetails() ) );
-
-        return saleDtoResponse;
     }
 
     private String saleDetailProductName(SaleDetail saleDetail) {
