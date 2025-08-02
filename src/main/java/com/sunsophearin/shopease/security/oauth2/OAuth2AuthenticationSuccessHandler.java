@@ -3,6 +3,7 @@ package com.sunsophearin.shopease.security.oauth2;
 import com.sunsophearin.shopease.security.service.impl.UserDetailsServiceImpl;
 import com.sunsophearin.shopease.security.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    @Value("${ALLOWED_ORIGINS_FRONTEND}")
+    private String allowedOrigins;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -45,6 +48,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
-        response.sendRedirect("http://localhost:3000");
+        response.sendRedirect(allowedOrigins);
     }
 }

@@ -1,5 +1,6 @@
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\config\CloudinaryConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\config\SwinggerConfig.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\config\WebConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\config\WebSocketConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\controllers\CategoryController.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\controllers\CategoryTypeController.java
@@ -71,7 +72,6 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\SaleRepository.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\SizeRepository.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\StockRepository.java
-D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\config\CorsConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\config\SecurityConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\controller\AuthController.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\dto\LoginRequest.java
@@ -121,4 +121,3 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\specification\ProductSpecification.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\util\DateFormatUtil.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\util\TelegramMessageBuilder.java
-D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\WebConfig.java
