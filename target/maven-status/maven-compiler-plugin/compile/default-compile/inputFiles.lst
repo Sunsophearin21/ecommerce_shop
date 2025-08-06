@@ -72,6 +72,7 @@ D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\s
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\SaleRepository.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\SizeRepository.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\repositories\StockRepository.java
+D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\config\CorsConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\config\SecurityConfig.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\controller\AuthController.java
 D:\Program\SPRING_WITH_VUE_PJ\shopease\shopease\src\main\java\com\sunsophearin\shopease\security\dto\LoginRequest.java

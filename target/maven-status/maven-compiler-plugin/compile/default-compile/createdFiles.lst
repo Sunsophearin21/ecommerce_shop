@@ -7,6 +7,7 @@ com\sunsophearin\shopease\config\WebConfig.class
 com\sunsophearin\shopease\repositories\ProductVariantRepository.class
 com\sunsophearin\shopease\enums\DeliveryStatus.class
 com\sunsophearin\shopease\repositories\ColorRepository.class
+com\sunsophearin\shopease\security\config\CorsConfig.class
 com\sunsophearin\shopease\exception\ApiNotFoundExceptionRespone.class
 com\sunsophearin\shopease\services\PaymentService.class
 com\sunsophearin\shopease\config\SwinggerConfig.class
@@ -40,6 +41,7 @@ com\sunsophearin\shopease\mapper\MenuFacturerMapper.class
 com\sunsophearin\shopease\repositories\CategoryTypeRepository.class
 com\sunsophearin\shopease\mapper\StockMapperImpl.class
 com\sunsophearin\shopease\controllers\MenuFacturerController.class
+com\sunsophearin\shopease\security\config\CorsConfig$1.class
 com\sunsophearin\shopease\services\impl\SaleServiceImpl.class
 com\sunsophearin\shopease\dto\SaleRequestDTO.class
 com\sunsophearin\shopease\mapper\ColorMapper.class
